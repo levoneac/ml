@@ -73,7 +73,7 @@ void matrix_choose_columns(Matrix dest, Matrix source, size_t col_start, size_t 
     assert(col_start < source.cols);
     assert(col_stop <= source.cols && col_stop > col_start);
     
-    Matrix transposed = matrix_initialize(source.cols, source.rows);
+    Matrix transposed = matrix_initialize(source.cols, source.rows);//when transposing, columns become rows, which can easily be referenced
     matrix_transpose(transposed, source);
 
     Matrix temp2 = {
@@ -82,6 +82,7 @@ void matrix_choose_columns(Matrix dest, Matrix source, size_t col_start, size_t 
         .data = &MATRIX_AT(transposed, col_start, 0) //a reference to the starting row (which was a column before transposing)
     };
 
+    matrix_inplace_transpose(temp2, &temp2.rows, &temp2.cols);//make the transposed columns into real columns again
     matrix_copy(dest, temp2);
     matrix_free(transposed);
 }
@@ -172,15 +173,15 @@ int matrix_transpose(Matrix dest, Matrix A){
     return 1;
 }
 
-void matrix_inplace_transpose(Matrix m, size_t *rows, size_t *cols){
+void matrix_inplace_transpose(Matrix m, size_t *m_rows, size_t *m_cols){
     Matrix temp = matrix_initialize(m.cols, m.rows);
     matrix_transpose(temp, m);
 
-    size_t temp_c = *cols;
-    *cols = *rows; //greia her er at referencer ikke oppdaterer det som allerede er passa inn
-    m.cols = *rows; //have to find a better way to do this later
+    size_t temp_c = *m_cols;
+    *m_cols = *m_rows; //greia her er at referencer ikke oppdaterer det som allerede er passa inn
+    m.cols = *m_rows; //have to find a better way to do this later
 
-    *rows = temp_c;
+    *m_rows = temp_c;
     m.rows = temp_c;
 
     matrix_copy(m, temp);

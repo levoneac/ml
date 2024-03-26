@@ -21,11 +21,11 @@ void matrix_print(Matrix m, const char* name);
 void matrix_copy(Matrix dest, Matrix source);
 
 //copies a row of the given Matrix into the dest
-//zero indexed
+//zero indexed and stop is non inclusive
 void matrix_choose_rows(Matrix dest, Matrix source, size_t row_start, size_t row_stop);
 
 //copies a column of the given Matrix into the dest
-//zero indexed
+//zero indexed and stop is non inclusive
 void matrix_choose_columns(Matrix dest, Matrix source, size_t col_start, size_t col_stop);
 
 //initializes the Matrix with specified amounts of rows and cols
@@ -53,7 +53,7 @@ int matrix_sum(Matrix dest, Matrix A, Matrix B);
 int matrix_transpose(Matrix dest, Matrix A);
 
 //transposes a Matrix inplace so that columns become rows and vice versa. DImensions are flipped
-void matrix_inplace_transpose(Matrix m, size_t *rows, size_t *cols);
+void matrix_inplace_transpose(Matrix m, size_t *m_rows, size_t *m_cols);
 
 //frees the memory of the Matrix
 void matrix_free(Matrix A);

@@ -15,9 +15,12 @@ typedef struct {
 } Neural_Network;
 
 Neural_Network nn_alloc(size_t *architecture, size_t architecture_count);
+void nn_free(Neural_Network nn);
 void nn_print(Neural_Network nn, const char *name);
 void nn_fill_with_random(Neural_Network nn, float min, float max);
 void nn_forward(Neural_Network nn);
-
+float nn_loss_function(Neural_Network nn, Matrix training_input, Matrix training_output);
+void nn_finite_difference(Neural_Network nn, Neural_Network gradient, Matrix t_input, Matrix t_output, float eps);
+void nn_learn(Neural_Network nn, Neural_Network gradient, float learn_rate);
 
 #endif

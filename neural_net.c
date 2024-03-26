@@ -36,13 +36,27 @@ Neural_Network nn_alloc(size_t *architecture, size_t architecture_count){
     return nn;
 }
 
+void nn_free(Neural_Network nn){
+    for(size_t i = 0; i < nn.count; i++){
+        matrix_free(nn.ws[i]);
+        matrix_free(nn.bs[i]);
+        matrix_free(nn.as[i]);
+        if(i == nn.count - 1){
+            matrix_free(nn.as[i +1]);
+        }
+    }
+    free(nn.ws);
+    free(nn.bs);
+    free(nn.as);
+}
+
 void nn_print(Neural_Network nn, const char *name){
     printf("NETWORK: %s\n\n", name);
 
     char buf[256];
 
-    snprintf(buf, sizeof(buf), "as:%d", 0);
-    matrix_print(nn.as[0], buf);
+    //snprintf(buf, sizeof(buf), "as:%d", 0);
+    //matrix_print(nn.as[0], buf);
 
 
     for(size_t i = 0; i < nn.count; i++){
@@ -52,8 +66,8 @@ void nn_print(Neural_Network nn, const char *name){
         snprintf(buf, sizeof(buf), "bs:%zu", i);
         matrix_print(nn.bs[i], buf);
 
-        snprintf(buf, sizeof(buf), "as:%zu", i+1);
-        matrix_print(nn.as[i + 1], buf);
+        //snprintf(buf, sizeof(buf), "as:%zu", i+1);
+        //matrix_print(nn.as[i + 1], buf);
 
         printf("\n");
     }
@@ -72,5 +86,73 @@ void nn_forward(Neural_Network nn){
         matrix_sum(nn.as[i + 1], nn.as[i + 1], nn.bs[i]);
         matrix_apply_sigmoid(nn.as[i + 1]);
     }
+}
 
+float nn_loss_function(Neural_Network nn, Matrix training_input, Matrix training_output){
+    assert(training_input.rows == training_output.rows); //there has to be the same amount of data in both input and output
+    assert(training_output.cols == nn.as[nn.count].cols); //output of model has to be same size as expected
+
+    size_t input_rows = training_input.rows;
+    size_t output_cols = training_output.cols;
+
+    float loss = 0.f;
+    float difference = 0.f;
+    Matrix y = matrix_initialize(1, training_output.cols); //y matrix
+    for(size_t i = 0; i < input_rows; i++){//iterate over all the input data
+        matrix_choose_rows(nn.as[0], training_input, i, i+1); //insert input into the inputlayer
+        matrix_choose_rows(y, training_output, i, i + 1); //insert the corresponding correct output into the y matrix
+
+        nn_forward(nn); //forward the given input through the current network
+
+        for(size_t j = 0; j < output_cols; j++){ //calculate the total squared difference between expected and real values
+            difference = MATRIX_AT(nn.as[nn.count], 0, j) - MATRIX_AT(y, 0, j); //difference between predicted and expected 
+            loss += difference*difference;
+        }
+    }
+    return loss /= input_rows;
+}
+
+void nn_finite_difference(Neural_Network nn, Neural_Network gradient, Matrix training_input, Matrix training_output, float eps){
+    float saved;
+    float loss = nn_loss_function(nn, training_input, training_output);
+
+    for(size_t layer = 0; layer < nn.count; layer++){
+        for(size_t i = 0; i < nn.ws[layer].rows; i ++){
+            for(size_t j = 0; j < nn.ws[layer].cols; j++){
+                saved = MATRIX_AT(nn.ws[layer], i, j);
+                MATRIX_AT(nn.ws[layer], i, j) += eps;
+                MATRIX_AT(gradient.ws[layer], i, j) = (nn_loss_function(nn, training_input, training_output) - loss) / eps;
+                MATRIX_AT(nn.ws[layer], i, j) = saved;
+            }
+        }
+    }
+
+    for(size_t layer = 0; layer < nn.count; layer++){
+        for(size_t i = 0; i < nn.bs[layer].rows; i ++){
+            for(size_t j = 0; j < nn.bs[layer].cols; j++){
+                saved = MATRIX_AT(nn.bs[layer], i, j);
+                MATRIX_AT(nn.bs[layer], i, j) += eps;
+                MATRIX_AT(gradient.bs[layer], i, j) = (nn_loss_function(nn, training_input, training_output) - loss) / eps;
+                MATRIX_AT(nn.bs[layer], i, j) = saved;
+            }
+        }
+    }
+}
+
+void nn_learn(Neural_Network nn, Neural_Network gradient, float learn_rate){
+    for(size_t layer = 0; layer < nn.count; layer++){
+        for(size_t i = 0; i < nn.ws[layer].rows; i ++){
+            for(size_t j = 0; j < nn.ws[layer].cols; j++){
+                MATRIX_AT(nn.ws[layer], i, j) -= learn_rate * MATRIX_AT(gradient.ws[layer], i, j);
+            }
+        }
+    }
+
+    for(size_t layer = 0; layer < nn.count; layer++){
+        for(size_t i = 0; i < nn.bs[layer].rows; i ++){
+            for(size_t j = 0; j < nn.bs[layer].cols; j++){
+                MATRIX_AT(nn.bs[layer], i, j) -= learn_rate * MATRIX_AT(gradient.bs[layer], i, j);
+            }
+        }
+    }
 }
