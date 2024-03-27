@@ -109,6 +109,7 @@ float nn_loss_function(Neural_Network nn, Matrix training_input, Matrix training
             loss += difference*difference;
         }
     }
+    matrix_free(y);
     return loss /= input_rows;
 }
 
@@ -155,4 +156,37 @@ void nn_learn(Neural_Network nn, Neural_Network gradient, float learn_rate){
             }
         }
     }
+}
+
+
+float nn_evaluate_classification(Neural_Network nn, Matrix train, Matrix test){
+    float sum_correct = 0;
+    Matrix actual_label = matrix_initialize(1,1);
+
+    for(size_t i = 0; i < train.rows; i++){
+        matrix_choose_rows(nn.as[0], train, i, i+1); 
+        matrix_choose_rows(actual_label, test, i, i+1); 
+
+        nn_forward(nn); 
+
+        float real = MATRIX_AT(actual_label, 0, 0);
+        float predicted = MATRIX_AT(nn.as[nn.count], 0, 0);
+        //printf("Predicted: %f, Real: %f\n",predicted, real); //print input with corresponding output
+
+        if(predicted >= 0.5){
+            predicted = 1;
+        } else {
+            predicted = 0;
+        }
+
+        if(predicted == real){
+            sum_correct++;
+        }
+
+    }   
+
+    //printf("Training accuracy = %f%% (%f / %zu)\n", (sum_correct / train.rows), sum_correct, train.rows);
+    matrix_free(actual_label);
+
+    return sum_correct / train.rows;
 }

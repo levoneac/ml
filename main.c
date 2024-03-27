@@ -1,46 +1,71 @@
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <time.h>
 #include <assert.h>
 #include "matrix.h"
 #include "neural_net.h"
+#include "read_csv.h"
 
-#define input_i 4
-#define input_j 3
 
-float XOR_values[input_i][input_j] = {
-    {0,0,0},
-    {0,1,1},
-    {1,0,1},
-    {1,1,0}
-};
 
 
 int main(){
-    srand(11);
+    return 0;
+}
 
-    size_t arch[] = {2, 2, 1};
+
+/*
+int main(){
+    srand(time(0));
+
+    size_t arch[] = {7, 3, 2, 1};
     Neural_Network nn = nn_alloc(arch, ARRAY_LEN(arch));
     Neural_Network g = nn_alloc(arch, ARRAY_LEN(arch));
     nn_fill_with_random(nn, 0, 1);
     //nn_forward(nn);
 
-    Matrix XOR_matrix = matrix_initialize(4,3);
-    matrix_add_data(XOR_matrix, XOR_values);
+
     
+    csv data = csv_read("test_data/apples_full.csv", ";");
 
-    Matrix X = matrix_initialize(XOR_matrix.rows, 2);
-    matrix_choose_columns(X, XOR_matrix, 0, 2);
-    //PRINT_MATRIX_WITH_NAME(X);
+    Matrix imported = matrix_initialize(data.n_rows, data.n_cols);
+    matrix_add_from_csv_import(imported, data);
 
-    Matrix Y = matrix_initialize(XOR_matrix.rows, 1);
-    matrix_choose_columns(Y, XOR_matrix, 2, 3);
-    //PRINT_MATRIX_WITH_NAME(Y);
+    csv_free(data);
+
+    //MAKE THIS A FUNCTION
+    float train_size_percent = 0.8;
+    size_t train_size = data.n_rows * train_size_percent;
+    size_t test_size = data.n_rows - train_size;
+
+    Matrix train = matrix_initialize(train_size, data.n_cols);
+    matrix_choose_rows(train, imported, 0, train_size);
+
+    Matrix test = matrix_initialize(test_size, data.n_cols);
+    matrix_choose_rows(test, imported, train_size, imported.rows);
+
+    Matrix X_train = matrix_initialize(train_size, 7);
+    matrix_choose_columns(X_train, train, 0, 7);
+
+    Matrix X_test = matrix_initialize(test_size, 7);
+    matrix_choose_columns(X_test, test, 0, 7);
+
+    Matrix Y_train = matrix_initialize(train_size, 1);
+    matrix_choose_columns(Y_train, train, 7, 8);
+
+    Matrix Y_test = matrix_initialize(test_size, 1);
+    matrix_choose_columns(Y_test, test, 7, 8);
+
+    matrix_free(train);
+    matrix_free(test);
+    matrix_free(imported);
+
 
     float loss = 0;
 
-    loss = nn_loss_function(nn, X, Y);
+    loss = nn_loss_function(nn, X_train, Y_train);
 
     //PRINT_NN_WITH_NAME(nn);
 
@@ -49,41 +74,34 @@ int main(){
 
     float epsilon = 1e-1;
     float rate = 1e-1;
-    size_t max_iter = 20000; 
+    size_t max_iter = 20; 
 
     for(size_t i = 0; i < max_iter; i++){
-        nn_finite_difference(nn, g, X, Y ,epsilon);
+        nn_finite_difference(nn, g, X_train, Y_train ,epsilon);
         nn_learn(nn, g, rate);
     }
     
 
-    loss = nn_loss_function(nn, X, Y);
+    loss = nn_loss_function(nn, X_train, Y_train);
     printf("%zu: After loss: %f\n", max_iter, loss);
 
     
 
     printf("---------------------\n");
 
-    //verification
-    for(size_t i = 0; i < X.rows; i++){
-        matrix_choose_rows(nn.as[0], X, i, i+1); //choose sample
+    float train_result = nn_evaluate_classification(nn, X_train, Y_train);
+    float test_result = nn_evaluate_classification(nn, X_test, Y_test);
 
-        //pick out induvidual features
-        float x1 = MATRIX_AT(nn.as[0], 0, 0); 
-        float x2 = MATRIX_AT(nn.as[0], 0, 1);
+    printf("train score: %f, test score: %f\n", train_result, test_result);
 
-        nn_forward(nn); //drive the sample through the network
-
-        printf("%f ^ %f: %f\n", x1, x2, MATRIX_AT(nn.as[nn.count], 0, 0)); //print input with corresponding output
-    }   
-
-    printf("---------------------\n");
-    
-    PRINT_NN_WITH_NAME(nn);
     nn_free(nn);
     nn_free(g);
 
-//LAG SUBMATRTIX FUNKSJON (COL, ROW)
+    matrix_free(X_train);
+    matrix_free(Y_train);
+    matrix_free(X_test);
+    matrix_free(Y_test);
 
     return 0;    
 }
+*/

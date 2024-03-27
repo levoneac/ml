@@ -22,5 +22,6 @@ void nn_forward(Neural_Network nn);
 float nn_loss_function(Neural_Network nn, Matrix training_input, Matrix training_output);
 void nn_finite_difference(Neural_Network nn, Neural_Network gradient, Matrix t_input, Matrix t_output, float eps);
 void nn_learn(Neural_Network nn, Neural_Network gradient, float learn_rate);
+float nn_evaluate_classification(Neural_Network nn, Matrix train, Matrix test);
 
 #endif

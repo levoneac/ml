@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "matrix.h"
+#include "read_csv.h"
 
 
 #define a_i 3
@@ -97,6 +98,12 @@ void matrix_add_data(Matrix m, float datum[m.rows][m.cols]){//to void or not to 
         for(size_t j = 0; j < m.cols; j++){
             MATRIX_AT(m, i, j) = datum[i][j];
         }
+    }
+}
+void matrix_add_from_csv_import(Matrix m, csv csv_import){
+    for(size_t i = 0; i < csv_import.n_rows; i++){
+        for (size_t j = 0; j < csv_import.n_cols; j++)
+            MATRIX_AT(m, i, j) = csv_import.data[i][j];
     }
 }
 

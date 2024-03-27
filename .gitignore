@@ -1,0 +1,6 @@
+outputs/
+test_data/
+
+*.csv
+
+csvtests.c

@@ -1,6 +1,9 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
+#include "read_csv.h"
+
+
 typedef struct {
     size_t rows;
     size_t cols;
@@ -33,6 +36,8 @@ Matrix matrix_initialize(size_t rows, size_t cols);
 
 //adds predefined data to a Matrix
 void matrix_add_data(Matrix m, float[m.rows][m.cols]);
+
+void matrix_add_from_csv_import(Matrix m, csv csv_import);
 
 //fills all the space in the Matrix with a chosen value
 void matrix_fill_with_value(Matrix m, float value);
