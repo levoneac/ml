@@ -8,9 +8,11 @@
 #define MAX_COLS 64
 #define MAX_ROWS 5000
 #define MAX_LINE_SIZE 2048
+#define MAX_COL_SIZE 128
 
 typedef struct{
     float *data[MAX_ROWS];
+    char *col_names[MAX_COLS];
     size_t n_rows;
     size_t n_cols;
 } csv;
