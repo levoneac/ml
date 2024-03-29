@@ -41,7 +41,7 @@ csv csv_read(const char *file_name, const char *delim){
                 }
 
                 csv_data.col_names[col_count] = temp;
-                col_count++; //use the colnames row(row_count == 0) to count rows. stupid but MVP
+                col_count++;
 
             }
             csv_data.n_cols = col_count;
