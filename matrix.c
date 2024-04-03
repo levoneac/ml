@@ -18,8 +18,29 @@ float rand_float_between(float min, float max){
     return min + rand_float() * (max - min);
 }
 
-float sigmoidf(float x){
+float sigmoidf_activation(float x){
     return 1.0f/(1.0f + expf(-x));
+}
+
+float tanhf_activation(float x){
+    return tanh(x);
+}
+
+float reluf_activation(float x){
+    if(x > 0){
+        return x;
+    } else {
+        return -0.01f;
+    }
+    
+}
+
+float linearf_activation(float x){//what
+    if(x < __FLT_MAX__){
+        return x;
+    } else {
+        return 1000;
+    }
 }
 
 void matrix_print(Matrix m, const char* name){
@@ -130,7 +151,16 @@ void matrix_fill_with_random(Matrix m, float min, float max){
 void matrix_apply_sigmoid(Matrix m){
     for(size_t i = 0; i < m.rows; i++){
         for(size_t j = 0; j < m.cols; j++){
-            MATRIX_AT(m, i, j) = sigmoidf(MATRIX_AT(m, i, j));
+            MATRIX_AT(m, i, j) = sigmoidf_activation(MATRIX_AT(m, i, j));
+        }
+    }
+}
+
+
+void matrix_apply_activation(Matrix m, float (*activation_function)(float x)){
+    for(size_t i = 0; i < m.rows; i++){
+        for(size_t j = 0; j < m.cols; j++){
+            MATRIX_AT(m, i, j) = (*activation_function)(MATRIX_AT(m, i, j));
         }
     }
 }

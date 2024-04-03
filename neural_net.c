@@ -10,9 +10,10 @@
 //size_t count = sizeof(layers)/sizeof(layers[0]);
 //Neural_Network nn_alloc(architecture, ARRAY_LEN(architecture));
 
-Neural_Network nn_alloc(size_t *architecture, size_t architecture_count){
+Neural_Network nn_alloc(size_t *architecture, size_t architecture_count, float(*activation_function)(float x)){
     Neural_Network nn;
 
+    nn.activation_func = activation_function;
     assert(architecture_count > 0); //if arch count is less than 1 you dont have inputs
     nn.count = architecture_count -1; //architecture_count also contains inputs
 
@@ -66,8 +67,8 @@ void nn_print(Neural_Network nn, const char *name){
         snprintf(buf, sizeof(buf), "bs:%zu", i);
         matrix_print(nn.bs[i], buf);
 
-        //snprintf(buf, sizeof(buf), "as:%zu", i+1);
-        //matrix_print(nn.as[i + 1], buf);
+        snprintf(buf, sizeof(buf), "as:%zu", i+1);
+        matrix_print(nn.as[i + 1], buf);
 
         printf("\n");
     }
@@ -84,7 +85,13 @@ void nn_forward(Neural_Network nn){
     for(size_t i = 0; i < nn.count; i++){
         matrix_multiplication(nn.as[i + 1], nn.as[i], nn.ws[i]); //multiply the inputs with the weights and forward them to the next layer
         matrix_sum(nn.as[i + 1], nn.as[i + 1], nn.bs[i]);
-        matrix_apply_sigmoid(nn.as[i + 1]);
+        
+        if(i == nn.count){
+            matrix_apply_sigmoid(nn.as[i + 1]);
+        } else {
+            matrix_apply_activation(nn.as[i + 1], nn.activation_func);
+        }
+        
     }
 }
 
@@ -159,13 +166,22 @@ void nn_learn(Neural_Network nn, Neural_Network gradient, float learn_rate){
 }
 
 
-float nn_evaluate_classification(Neural_Network nn, Matrix train, Matrix test){
-    float sum_correct = 0;
+Model_Confusion_Data nn_evaluate_classification(Neural_Network nn, Matrix X, Matrix Y){
+    Model_Confusion_Data evaluation;
+    evaluation.n_samples = X.rows;
+    evaluation.total_positives = 0;
+    evaluation.total_negatives = 0;
+    evaluation.correct_predictions = 0;
+    evaluation.wrong_predictions = 0;
+    evaluation.true_positives = 0;
+    evaluation.false_positives = 0;
+    evaluation.true_negatives = 0;
+    evaluation.false_negatives = 0;
     Matrix actual_label = matrix_initialize(1,1);
 
-    for(size_t i = 0; i < train.rows; i++){
-        matrix_choose_rows(nn.as[0], train, i, i+1); 
-        matrix_choose_rows(actual_label, test, i, i+1); 
+    for(size_t i = 0; i < X.rows; i++){
+        matrix_choose_rows(nn.as[0], X, i, i+1); 
+        matrix_choose_rows(actual_label, Y, i, i+1); 
 
         nn_forward(nn); 
 
@@ -180,13 +196,41 @@ float nn_evaluate_classification(Neural_Network nn, Matrix train, Matrix test){
         }
 
         if(predicted == real){
-            sum_correct++;
+            evaluation.correct_predictions++;
+        } else {
+            evaluation.wrong_predictions++;
         }
 
+        if(real == 1 && predicted == 1){
+            evaluation.true_positives++;
+            evaluation.total_positives++;
+        } else if(real == 1 && predicted == 0){
+            evaluation.false_negatives++;
+            evaluation.total_positives++;
+        } else if(real == 0 && predicted == 1){
+            evaluation.false_positives++;
+            evaluation.total_negatives++;
+        } else if(real == 0 && predicted == 0){
+            evaluation.true_negatives++;
+            evaluation.total_negatives++;
+        }
     }   
 
-    //printf("Training accuracy = %f%% (%f / %zu)\n", (sum_correct / train.rows), sum_correct, train.rows);
+    //printf("Training accuracy = %f%% (%f / %zu)\n", (sum_correct / X.rows), sum_correct, X.rows);
     matrix_free(actual_label);
 
-    return sum_correct / train.rows;
+    return evaluation;
+}
+
+Model_Prediction_Information nn_prediction_information(Model_Confusion_Data confusion_table){
+    Model_Prediction_Information info;
+    info.accuracy = confusion_table.correct_predictions / confusion_table.n_samples;
+    info.true_positive_rate = confusion_table.true_positives / confusion_table.total_positives;
+    info.false_positive_rate = confusion_table.false_positives / confusion_table.total_negatives;
+    info.true_negative_rate = confusion_table.true_negatives / confusion_table.total_negatives;
+    info.false_negative_rate = confusion_table.false_negatives / confusion_table.total_positives;
+    info.precision = confusion_table.true_positives / (confusion_table.true_positives + confusion_table.false_positives);
+    info.f1_score = (2 * info.true_positive_rate * info.precision) / (info.true_positive_rate + info.precision);
+
+    return info;
 }

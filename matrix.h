@@ -15,7 +15,10 @@ typedef struct {
 
 float rand_float(void);
 float rand_float_between(float min, float max);
-float sigmoidf(float x);
+float sigmoidf_activation(float x);
+float tanhf_activation(float x);
+float reluf_activation(float x);
+float linearf_activation(float x);
 
 //prints the values of the Matrix
 void matrix_print(Matrix m, const char* name);
@@ -47,6 +50,8 @@ void matrix_fill_with_random(Matrix m, float min, float max);
 
 //applies activation function, so that all values in the Matrix is between 0 and 1
 void matrix_apply_sigmoid(Matrix m);
+
+void matrix_apply_activation(Matrix m, float (*activation_function)(float x));
 
 //performs Matrix multiplication. Number of columns in A needs the be the same as number of rows in B. Output is A_rows X B_cols
 int matrix_multiplication(Matrix dest, Matrix A, Matrix B);
