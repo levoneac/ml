@@ -1,6 +1,5 @@
 outputs/
+output/
 test_data/
-
-*.csv
 
 csvtests.c

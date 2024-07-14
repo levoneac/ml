@@ -12,7 +12,7 @@
 
 int main(){
     srand(time(0));
-    csv data = csv_read("test_data/apples_full.csv", ";");
+    csv data = csv_read("data.csv", ";");
 
     size_t arch[] = {data.n_cols-1, 5, 3, 1}; //8 bias + (7*5 + 5*3 + 3*1) weights = 8 + (35 + 15 + 3) = 61 parameters (biases(not first layer) + products of neurons in each pair of layers)
     Neural_Network nn = nn_alloc(arch, ARRAY_LEN(arch), tanhf_activation);
