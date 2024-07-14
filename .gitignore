@@ -3,3 +3,4 @@ output/
 test_data/
 
 csvtests.c
+.vscode
