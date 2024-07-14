@@ -7,6 +7,6 @@ On windows you could run:
 ```
 gcc -o output/main main.c matrix.c neural_net.c read_csv.c -lm
 ```
-And then run the exe.
+With your compiler of choice, and then run the exe.
 On linux you could do the same or run build.sh
 
