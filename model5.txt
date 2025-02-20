@@ -1,19 +1,19 @@
-0: Start loss: 1.319069
-30: After loss: 0.248947
+0: Start loss: 0.245330
+3000: After loss: 0.000147
 ---------------------
 Train:
 samples: 41.000000, total positives: 20.000000, total negatives: 21.000000,
-correct: 20.000000, wrong: 21.000000,
-true_positive: 10.000000, false_positive: 11.000000,
-true_negative: 10.000000, false_negative: 10.000000
-TPR: 0.500000, FNR: 0.500000, FPR: 0.523810, TNR: 0.476190,
-accuracy 0.487805, Precision: 0.476190, F1_score: 0.487805
+correct: 41.000000, wrong: 0.000000,
+true_positive: 20.000000, false_positive: 0.000000,
+true_negative: 21.000000, false_negative: 0.000000
+TPR: 1.000000, FNR: 0.000000, FPR: 0.000000, TNR: 1.000000,
+accuracy 1.000000, Precision: 1.000000, F1_score: 1.000000
 ---------------------
 Test:
 samples: 11.000000, total positives: 6.000000, total negatives: 5.000000,
-correct: 6.000000, wrong: 5.000000,
-true_positive: 3.000000, false_positive: 2.000000,
-true_negative: 3.000000, false_negative: 3.000000
-TPR: 0.500000, FNR: 0.500000, FPR: 0.400000, TNR: 0.600000,
-accuracy 0.545455, Precision: 0.600000, F1_score: 0.545455
+correct: 11.000000, wrong: 0.000000,
+true_positive: 6.000000, false_positive: 0.000000,
+true_negative: 5.000000, false_negative: 0.000000
+TPR: 1.000000, FNR: 0.000000, FPR: 0.000000, TNR: 1.000000,
+accuracy 1.000000, Precision: 1.000000, F1_score: 1.000000
 ---------------------
