@@ -97,7 +97,7 @@ void nn_forward(Neural_Network nn)
 
         if (i == nn.count)
         {
-            matrix_apply_sigmoid(nn.as[i + 1]);
+            // matrix_apply_sigmoid(nn.as[i + 1]);
         }
         else
         {

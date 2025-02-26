@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <assert.h>
+#include <stdbool.h>
 #include "matrix.h"
 #include "neural_net.h"
 #include "read_csv.h"
@@ -12,11 +13,11 @@ int main()
 {
        // srand(time(0));
        srand(1);
-       csv data = csv_read("data.csv", ";");
+       csv data = csv_read("output20000.csv", ";", true);
 
-       size_t arch[] = {data.n_cols - 1, 5, 3, 1}; // 8 bias + (7*5 + 5*3 + 3*1) weights = 8 + (35 + 15 + 3) = 61 parameters (biases(not first layer) + products of neurons in each pair of layers)
-       Neural_Network nn = nn_alloc(arch, ARRAY_LEN(arch), tanhf_activation);
-       Neural_Network g = nn_alloc(arch, ARRAY_LEN(arch), tanhf_activation);
+       size_t arch[] = {data.n_cols - 1, 8, 8, 1}; // 8 bias + (7*5 + 5*3 + 3*1) weights = 8 + (35 + 15 + 3) = 61 parameters (biases(not first layer) + products of neurons in each pair of layers)
+       Neural_Network nn = nn_alloc(arch, ARRAY_LEN(arch), reluf_activation);
+       Neural_Network g = nn_alloc(arch, ARRAY_LEN(arch), reluf_activation);
        nn_fill_with_random(nn, -1, 1);
        // nn_forward(nn);
 
@@ -26,7 +27,7 @@ int main()
        csv_free(data);
 
        // MAKE THIS A FUNCTION
-       float train_size_percent = 0.8;
+       float train_size_percent = 0.95;
        size_t train_size = data.n_rows * train_size_percent;
        size_t test_size = data.n_rows - train_size;
 
@@ -62,16 +63,36 @@ int main()
 
        float epsilon = 1e-4;
        float rate = 1e-1;      // too big and you jump too much per iteration. too small will take too long to reach minimum but more precise
-       size_t max_iter = 3000; // epochs
+       size_t max_iter = 1000; // epochs
+       size_t batch_size = 10;
 
-       for (size_t i = 0; i < max_iter; i++)
+       Matrix X_train_batch = matrix_initialize(batch_size, data.n_cols - 1);
+       Matrix Y_train_batch = matrix_initialize(batch_size, 1);
+       size_t max_full_batches = X_train.rows / batch_size;
+       printf("%zu / %zu = %zu\n", X_train.rows, batch_size, max_full_batches);
+
+       for (size_t batch_num = 0; batch_num < max_full_batches; batch_num++)
        {
-              nn_finite_difference(nn, g, X_train, Y_train, epsilon);
-              nn_learn(nn, g, rate);
+              size_t batch_start = batch_num * batch_size;
+              matrix_choose_rows(X_train_batch, X_train, batch_start, batch_start + batch_size);
+              matrix_choose_rows(Y_train_batch, Y_train, batch_start, batch_start + batch_size);
+              for (size_t i = 0; i < max_iter; i++)
+              {
+                     nn_finite_difference(nn, g, X_train_batch, Y_train_batch, epsilon);
+                     nn_learn(nn, g, rate);
+              }
+              loss = nn_loss_function(nn, X_train_batch, Y_train_batch);
+              printf("Batch %zu loss: %f\n", batch_num, loss);
        }
+
+       matrix_free(X_train_batch);
+       matrix_free(Y_train_batch);
 
        loss = nn_loss_function(nn, X_train, Y_train);
        printf("%zu: After loss: %f\n", max_iter, loss);
+
+       loss = nn_loss_function(nn, X_test, Y_test);
+       printf("Test loss: %f\n", loss);
 
        printf("---------------------\n");
 

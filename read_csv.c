@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "read_csv.h"
 
-csv csv_read(const char *file_name, const char *delim)
+csv csv_read(const char *file_name, const char *delim, bool includes_col_names)
 {
     FILE *csv_file = fopen(file_name, "r"); // open file with read mode
 
@@ -22,7 +23,7 @@ csv csv_read(const char *file_name, const char *delim)
 
     while (fgets(line, MAX_LINE_SIZE, csv_file))
     { // read line by line
-        if (row_count == 0)
+        if (row_count == 0 && includes_col_names)
         {
             for (char *tok = strtok(line, delim); tok && *tok; tok = strtok(NULL, enddelim))
             {
